@@ -22,7 +22,7 @@ const sessionStore = new mysqlSessionStore(mysqlConnectionOptions); // mysql 세
 app.use(
     session({
         key: 'mysqlSessionTest',
-        secret: 'mysqlSessionTestSecret',
+        secret: process.env.SESSION_SECRET, // object로 생성한 후 불러와서 쓸 것.
         store: sessionStore,
         resave: false,
         saveUninitialized: false,
@@ -31,7 +31,7 @@ app.use(
 
 app.use(bodyParser.urlencoded({ extended: true })) // URL 인코딩된 본문만 구문 분석(parsing : 원하는 형태로 가공)
 app.use(async (req, res, next) => {
-    res.locals.session = req.session
+    res.locals.session = req.session // 템플릿 엔진에서 사용하는건지 확인 후 사용할 것.
     //const { accessToken } = await req.cookies
     //console.log(accessToken)
     // if (accessToken) {

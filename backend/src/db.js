@@ -3,7 +3,6 @@ require('dotenv').config()
 
 const mysqlConnectionOptions = {
     host: process.env.host,
-    port: 3306,
     user: process.env.user,
     password: process.env.password,
     database: process.env.database,
