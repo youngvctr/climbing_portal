@@ -1,3 +1,4 @@
+const MySQLStore = require('express-mysql-session')
 const mysql = require('mysql2')
 require('dotenv').config()
 
@@ -8,7 +9,9 @@ const mysqlConnectionOptions = {
     database: process.env.database,
 }
 
-const connection = mysql.createConnection(mysqlConnectionOptions)
-connection.connect()
+const pool = mysql.createPool(mysqlConnectionOptions)
+const promisePool = pool.promise()
+//const connection = mysql.createConnection(mysqlConnectionOptions)
+//connection.connect()
 
-module.exports = { mysqlConnectionOptions, connection }
+module.exports = { mysqlConnectionOptions, pool, promisePool }
