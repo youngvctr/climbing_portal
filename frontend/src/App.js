@@ -1,14 +1,18 @@
-import Footer from './components/UI/Layout/Footer';
-import Header from './components/UI/Layout/Header';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import SignIn from './components/Auth/SignIn';
+import SignUp from './components/SignUp/SignUp';
 import Layout from './components/UI/Layout/Layout';
 
 function App() {
   return (
-    <>
-      <Header />
-      <Layout></Layout>
-      <Footer />
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route path="/login" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
