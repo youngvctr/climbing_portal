@@ -1,12 +1,12 @@
-const MySQLStore = require('express-mysql-session')
 const mysql = require('mysql2')
+const config = require('../config')
 require('dotenv').config()
 
 const mysqlConnectionOptions = {
-    host: process.env.host,
-    user: process.env.user,
-    password: process.env.password,
-    database: process.env.database,
+    host: config.db.host,
+    user: config.db.user,
+    password: config.db.password,
+    database: config.db.database,
 }
 
 const pool = mysql.createPool(mysqlConnectionOptions)
