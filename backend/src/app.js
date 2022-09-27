@@ -1,10 +1,10 @@
 const express = require('express') // 프레임워크
-const path = require('path') // 파일/폴더/디렉터리 등의 경로 처리
+//const path = require('path') // 파일/폴더/디렉터리 등의 경로 처리
 const session = require('express-session') // 로그인, 인증처리 모듈
 const MySQLStore = require('express-mysql-session') // 로그인, 인증처리 모듈 => mySQLStore에 저장
 const bodyParser = require('body-parser') // POST request data의 body로부터 파라미터를 편리하게 추출
 const cookieParser = require('cookie-parser') // 쿠키 헤더 구문 분석 및 req.cookies에 키값이 쿠키이름인 object를 채워줌.
-const routeAuth = require('../routes/auth') // Auth 라우터
+const routeUsers = require('../routes/users') // Auth 라우터
 const routeIndex = require('../routes/index') // Index 라우터
 const { mysqlConnectionOptions } = require('../src/db')
 
@@ -42,8 +42,16 @@ app.use(async (req, res, next) => {
     next()
 })
 
+var corsOptions = {
+    origin: 'http://localhost:3100/',
+    optionsSuccessStatus: 200
+}
+app.use(cors(corsOptions))
+
+//app.get('/')
+
 app.use('/', routeIndex)
-app.use('/auth', routeAuth)
+app.use('/users', routeUsers)
 
 // Error
 app.use((req, res, next) => {
