@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { promisePool } = require('../src/db')
 const cryptoJS = require('crypto-js')
+const config = require('../config/config')
 
 /** register */
 router
@@ -32,16 +33,16 @@ router
             "username": req.body.username.toLowerCase(), // field
             "password": cryptoJS.SHA256( // password 암호화 ; Bcrypt
                 req.body.password.toLowerCase(),
-                process.env.PASS_SEC
+                config.passport.secret
             ).toString(),
             "name": req.body.name,
             "email": cryptoJS.AES.encrypt(
                 req.body.email.toLowerCase(),
-                process.env.PASS_SEC
+                config.passport.secret
             ).toString(),
             "phone": cryptoJS.AES.encrypt(
                 req.body.phone,
-                process.env.PASS_SEC
+                config.passport.secret
             ).toString(),
             "regDatetime": today,
         }

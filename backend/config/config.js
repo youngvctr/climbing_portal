@@ -27,6 +27,13 @@ const config = {
     cors: {
         allowedOrigin: required('CORS_ALLOW_ORIGIN'),
     },
+    session: {
+        key: required('SESSION_KEY'),
+        secret: required('SESSION_SECRET'),
+    },
+    passport: {
+        secret: required('PASSPORT_SECRET'),
+    }
 }
 
 module.exports = config
