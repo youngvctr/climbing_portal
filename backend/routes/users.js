@@ -69,22 +69,79 @@ router
                 })
             //console.log(rows)//rows[0].username)
         } catch (err) {
-            res.send({
-                "code": 500, // http status code ; 생성 성공
-                "fail": err.message
-            })
+            res.status(500).json({ "fail": `${reject}` })
         }
     })
 
 router
     .route('/:id')
     .get(async (req, res) => {
+        try {
+            const checkNameSQL = `SELECT username, password, name, email, phone FROM user where username='${username}';`
+            console.log(checkNameSQL)
+            await promisePool.query(checkNameSQL, username)
+                .then((response, reject) => {
+                    const userInfo = {
+                        "username": response[0][0].username, // field
+                        "password": response[0][0].password,
+                        "name": response[0][0].name,
+                        "email": cryptoJS.AES.decrypt(
+                            response[0][0].email,
+                            config.passport.secret
+                        ).toString(),
+                        "phone": cryptoJS.AES.decrypt(
+                            response[0][0].phone,
+                            config.passport.secret
+                        ).toString(),
+                    }
+                    console.log(userInfo.username, userInfo.name, userInfo.email, userInfo.phone)
+                    return res.status(200).json()
+                })
+        } catch (e) {
+            throw e.message
+        }
     })
     .put(async (req, res) => {
+        try {
+            const updateUserSQL = 'UPDATE user SET name = ?, email = ?, phone = ? WHERE username = ?'
+            console.log(updateUserSQL)
+            await promisePool.query(updateUserSQL, [body.name, body.email, body.phone, body.username])
+            return res.status(201).json({ "success": `User infomation is updated!` })
+        } catch (e) {
+            throw e.message
+        }
     })
 
 router.put('/:id/password', async (req, res) => {
-
+    try {
+        // request password
+        var post = req.body
+        const hashedPassword = cryptoJS.SHA256(
+            post.password,
+            config.passport.secret
+        ).toString()
+        const checkPwSQL = `SELECT password FROM user where password='${hashedPassword}';`
+        console.log(checkPwSQL)
+        await promisePool.query(checkPwSQL, hashedPassword)
+            .then((response, reject) => {
+                if (!response[0]) {
+                    console.log('Password was wrong')
+                    return res.status(401).json('Password was wrong')
+                }
+            })
+    } catch (e) {
+        throw e.message
+    }
+    // update password
+    try {
+        const changedPw = cryptoJS.SHA256(req.body.password.toLowerCase(), config.passport.secret).toString()
+        const updatePwSQL = 'UPDATE user SET password = ? WHERE username = ?'
+        console.log(updatePwSQL)
+        await promisePool.query(updatePwSQL, [changedPw, body.username])
+        return res.status(201).json({ "success": `Password is updated!` })
+    } catch (e) {
+        throw e.message
+    }
 })
 
 module.exports = router
