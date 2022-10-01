@@ -4,8 +4,22 @@ import useInput from '../../hooks/use-input';
 import { validateUsername, validatePassword } from '../../utils/authValidator';
 import useHttp from '../../hooks/use-http';
 import config from '../../config';
+import { useDispatch, useSelector } from 'react-redux';
+import { authActions } from '../../store/auth';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function SignIn() {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  });
+
   const {
     value: username,
     isValid: usernameIsValid,
@@ -38,6 +52,7 @@ export default function SignIn() {
     };
     const signUpCallback = () => {
       alert('로그인 완료'); // 페이지 이동 추후 구현
+      dispatch(authActions.login());
     };
     signInRequest(reqeustConfig, signUpCallback);
   };
