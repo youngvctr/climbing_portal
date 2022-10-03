@@ -13,20 +13,20 @@ router
     .post(async (req, res) => {
         const today = new Date()
 
-        var unameRegExp = /^[a-zA-z0-9\s]{2,10}$/
+        const unameRegExp = /^[a-zA-z0-9\s]{2,10}$/
         unameRegExp.test(req.body.username) ? console.log('pass') : console.log('Check username validation')
 
-        var pwRegExp = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[a-z\d@$!%*#?&\s]{4,15}$/
+        const pwRegExp = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[a-z\d@$!%*#?&\s]{4,15}$/
         pwRegExp.test(req.body.password) ? console.log('pass') : console.log('Check password validation')
 
-        var nameRegExp = /^[a-zA-z가-힣\s]{2,10}$/
+        const nameRegExp = /^[a-zA-z가-힣\s]{2,10}$/
         nameRegExp.test(req.body.name) ? console.log('pass') : console.log('Check name validaion')
 
-        var emailRegExp = /^[0-9a-zA-Z\s]([-_.]?[0-9a-zA-Z\s])*@[0-9a-zA-Z\s]([-_.]?[0-9a-zA-Z\s])*.[a-zA-Z\s]{2,3}$/i
+        const emailRegExp = /^[0-9a-zA-Z\s]([-_.]?[0-9a-zA-Z\s])*@[0-9a-zA-Z\s]([-_.]?[0-9a-zA-Z\s])*.[a-zA-Z\s]{2,3}$/i
         emailRegExp.test(req.body.email) ? console.log('pass') : console.log('Check email validation')
 
         req.body.phone.replace(' ', "")
-        var phoneRegExp = /^\d{3}-\d{3,4}-\d{4}$/
+        const phoneRegExp = /^\d{3}-\d{3,4}-\d{4}$/
         phoneRegExp.test(req.body.phone) ? console.log('pass') : console.log('Check phone validation')
 
         const userInfo = {
@@ -48,8 +48,8 @@ router
         }
 
         try {
-            const checkNameSQL = `SELECT username FROM user where username='${userInfo.username}';`
-            await promisePool.query(checkNameSQL) // DB관련 파트도 분리시킬것.
+            const checkNameSQL = `SELECT username FROM user where username= ?`
+            await promisePool.query(checkNameSQL, userInfo.username) // DB관련 파트도 분리시킬것.
                 .then((response, reject) => {
                     if (!response[0].length) {
                         try {
@@ -77,7 +77,8 @@ router
     .route('/:id')
     .get(async (req, res) => {
         try {
-            const checkNameSQL = `SELECT username, password, name, email, phone FROM user where username='${username}';`
+            //const username = username 
+            const checkNameSQL = `SELECT username, password, name, email, phone FROM user where username=?`
             console.log(checkNameSQL)
             await promisePool.query(checkNameSQL, username)
                 .then((response, reject) => {
@@ -106,18 +107,18 @@ router
             const updateUserSQL = 'UPDATE user SET name = ?, email = ?, phone = ? WHERE username = ?'
             console.log(updateUserSQL)
             await promisePool.query(updateUserSQL, [body.name, body.email, body.phone, body.username])
-            return res.status(201).json({ "success": `User infomation is updated!` })
+            return res.status(201).json({ "success": `User information is updated!` })
         } catch (e) {
             throw e.message
         }
     })
 
 router.put('/:id/password', async (req, res) => {
+    const { currentPassword, newPassword } = req.body
     try {
-        // request password
-        var post = req.body
+        // current password
         const hashedPassword = cryptoJS.SHA256(
-            post.password,
+            currentPassword,
             config.passport.secret
         ).toString()
         const checkPwSQL = `SELECT password FROM user where password='${hashedPassword}';`
@@ -126,15 +127,15 @@ router.put('/:id/password', async (req, res) => {
             .then((response, reject) => {
                 if (!response[0]) {
                     console.log('Password was wrong')
-                    return res.status(401).json('Password was wrong')
+                    return res.status(401).json('Password was wrong') // frontend에 넘겨줄 json형식 데이터
                 }
             })
     } catch (e) {
         throw e.message
     }
     // update password
-    try {
-        const changedPw = cryptoJS.SHA256(req.body.password.toLowerCase(), config.passport.secret).toString()
+    try { //new password
+        const changedPw = cryptoJS.SHA256(newPassword.toLowerCase(), config.passport.secret).toString()
         const updatePwSQL = 'UPDATE user SET password = ? WHERE username = ?'
         console.log(updatePwSQL)
         await promisePool.query(updatePwSQL, [changedPw, body.username])

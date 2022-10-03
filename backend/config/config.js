@@ -2,7 +2,7 @@ const dotenv = require('dotenv')
 
 dotenv.config()
 
-function required(key, defaultValue = undefined) {
+function required(key, defaultValue = undefined) { //required 주의
     const value = process.env[key] || defaultValue
 
     if (value == null) {
