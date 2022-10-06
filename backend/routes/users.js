@@ -75,14 +75,14 @@ router
                 .then((response, reject) => {
                     const { username, password, name, email, phone } = response[0][0]
                     const userInfo = {
-                        "username": username, // field
-                        "password": password,
-                        "name": name,
-                        "email": cryptoJS.AES.decrypt(
+                        username: username, // field
+                        password: password,
+                        name: name,
+                        email: cryptoJS.AES.decrypt(
                             email,
                             config.passport.secret
                         ).toString(),
-                        "phone": cryptoJS.AES.decrypt(
+                        phone: cryptoJS.AES.decrypt(
                             phone,
                             config.passport.secret
                         ).toString(),
@@ -100,20 +100,20 @@ router
             const updateUserSQL = 'UPDATE user SET name = ?, email = ?, phone = ? WHERE id = ?'
             const { username, name, email, phone } = validation(req)
             const userInfo = {
-                "username": username, // field
-                "name": name,
-                "email": cryptoJS.AES.encrypt(
+                username: username, // field
+                name: name,
+                email: cryptoJS.AES.encrypt(
                     email,
                     config.passport.secret
                 ).toString(),
-                "phone": cryptoJS.AES.encrypt(
+                phone: cryptoJS.AES.encrypt(
                     phone,
                     config.passport.secret
                 ).toString(),
             }
 
             promisePool.query(updateUserSQL, [userInfo.name, userInfo.email, userInfo.phone, id])
-            return res.status(201).json({ message: `User information is updated. 😄` })
+            return res.status(200).json({ message: `User information is updated. 😄` })
         } catch (err) {
             throw err.message
         }
@@ -142,10 +142,10 @@ router.put('/:id/password', async (req, res) => {
                         promisePool.query(updatePwSQL, [changedPw, id])
                         return res.status(201).json({ message: `Password is updated. 🙂` })
                     } catch (err) {
-                        return res.status(401).json({ message: `Password update was fail. 😞`, err })
+                        return res.status(500).json({ message: `Password update was fail. 😞`, err })
                     }
                 } else {
-                    return res.status(401).json({ message: 'Password was wrong. 😟' }) // frontend에 넘겨줄 json형식 데이터
+                    return res.status(400).json({ message: 'Password was wrong. 😟' }) // frontend에 넘겨줄 json형식 데이터
                 }
             })
     } catch (e) {
