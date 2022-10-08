@@ -13,7 +13,7 @@ router
     })
     .post(async (req, res) => {
         const today = new Date()
-        console.log(req.body)
+        //console.log(req.body)
         const { username, password, name, email, phone } = validation(req)
         const userInfo = {
             username: username.toLowerCase(), // field
