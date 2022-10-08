@@ -16,21 +16,21 @@ router
         console.log(req.body)
         const { username, password, name, email, phone } = validation(req)
         const userInfo = {
-            "username": username.toLowerCase(), // field
-            "password": cryptoJS.SHA256( // password 암호화 ; Bcrypt
+            username: username.toLowerCase(), // field
+            password: cryptoJS.SHA256( // password 암호화 ; Bcrypt
                 password.toLowerCase(),
                 config.passport.secret
             ).toString(),
-            "name": name,
-            "email": cryptoJS.AES.encrypt(
+            name: name,
+            email: cryptoJS.AES.encrypt(
                 email.toLowerCase(),
                 config.passport.secret
             ).toString(),
-            "phone": cryptoJS.AES.encrypt(
+            phone: cryptoJS.AES.encrypt(
                 phone,
                 config.passport.secret
             ).toString(),
-            "regDatetime": today,
+            regDatetime: today,
         }
 
         try {
