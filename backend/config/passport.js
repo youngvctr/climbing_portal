@@ -1,35 +1,45 @@
 var passport = require('passport')
-var LocalStrategy = require('passport-local')
+var LocalStrategy = require('passport-local').Strategy
 const { promisePool } = require('../src/db')
+const cryptoJS = require('crypto-js')
+const config = require('../config/config')
 
-passport.serializeUser(function (user, done) {
-    done(null, user.username)
-    // process.nextTick(function () {
-    //     cb(null, { id: user.id, username: user.username });
-    // });
-});
+module.exports = () => {
+    passport.serializeUser((username, done) => {
+        return done(null, username)
+    });
 
-passport.deserializeUser(function (user, done) {
-    done(null, user.username)
-    // process.nextTick(function () {
-    //     return cb(null, user);
-    // });
-});
+    passport.deserializeUser((username, done) => {
+        return done(null, username)
+    });
 
-passport.use(new LocalStrategy(function verify(username, password, cb) {
-    const checkUsername = `SELECT * FROM users WHERE username = ?`
-    promisePool.get(checkUsername, [username], function (err, user) {
-        if (err) { return cb(err) }
-        if (!user) { return cb(null, false, { message: 'Incorrect username or password.' }) }
+    passport.use(new LocalStrategy({
+        usernameField: 'username',
+        passwordField: 'password',
+        idField: 'id',
+        session: true,
+        passReqToCallback: false,
+    }, async (un, pw, done) => {
+        //console.log(un)
+        const checkUsername = `SELECT * FROM user WHERE username = ?`
+        promisePool.query(checkUsername, un)
+            .then((res, rej) => {
+                if (rej) { return done(rej) }
+                const { id: userId, username, password } = res[0][0]
+                if (!username) { return done(null, false, { message: 'Incorrect username or password.' }) }
+                const hashedPassword = cryptoJS.SHA256(
+                    pw,
+                    config.passport.secret
+                ).toString()
+                try {
+                    if (hashedPassword !== password) {
+                        return done(null, false, { message: 'Incorrect username or password.' })
+                    }
+                    return done(null, { id: userId })
+                } catch (err) {
+                    throw err
+                }
+            })
+    }))
 
-        crypto.pbkdf2(password, user.salt, 310000, 32, 'sha256', function (err, hashedPassword) {
-            if (err) { return cb(err) }
-            if (!crypto.timingSafeEqual(user.hashed_password, hashedPassword)) {
-                return cb(null, false, { message: 'Incorrect username or password.' })
-            }
-            return cb(null, user)
-        })
-    })
-}))
-
-module.exports = passport
+}
